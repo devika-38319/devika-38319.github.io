@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Devika Godbole" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="../../img/favicon.ico">
+    <title>Project 2</title>
+    <meta name="generator" content="Hugo 0.79.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="../../"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="../../post/">BLOG</a></li>
+        
+        <li><a href="../../projects/">PROJECTS</a></li>
+        
+        <li><a href="../../resume/">CV</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="../../project/project2/">Project 2</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<p><strong>Question 0</strong></p>
+<p><em>This dataset contains 390 observations of 18 variables one of which is diabetes status. Sixty patients out of 390 were found to be diabetic. Some of the other &quot;important&quot; variables include Glucose, Chol/HDL ratio (the lower the healthier), Age, Gender, Systolic BP, Diastolic BP, and Waist/hip ratio (the lower the usually healthier). First, we will see if any of the numeric variables show a mean difference across Gender. Then, we will try to predict waist/hip ratio. Finally, we will use various logistic regressions to see how well we can predict Diabetes without using the Glucose variable.</em></p>
+<p><strong>Question 1</strong></p>
+<p><em>Perform a MANOVA testing whether any of your numeric variables (or a subset of them, if including them all is unreasonable or doesn’t make sense) show a mean difference across levels of one of your categorical variables</em></p>
+<pre class="r"><code>data &lt;- read.csv(&quot;~/Diabetes_Classification.csv&quot;)
+data &lt;- data %&gt;% select(3,5,6,7,10:12,15:16)
+data &lt;- data %&gt;%
+      mutate(Diabetes = ifelse(Diabetes == &quot;No diabetes&quot;,0,1))
+
+names(data) &lt;- c(&quot;glucose&quot;, &quot;cholratio&quot;,&quot;age&quot;,&quot;gender&quot;,&quot;bmi&quot;,&quot;systbp&quot;,&quot;diastbp&quot;,&quot;waisthipratio&quot;,&quot;diabetes&quot;)
+
+head(data)</code></pre>
+<pre><code>## glucose cholratio age gender bmi systbp diastbp
+waisthipratio diabetes
+## 1 77 3.9 19 female 22.5 118 70 0.84 0
+## 2 79 3.6 19 female 26.4 108 58 0.83 0
+## 3 75 4.0 20 female 29.3 110 72 0.89 0
+## 4 97 3.2 20 female 19.6 122 64 0.79 0
+## 5 91 2.4 20 female 20.2 122 86 0.82 0
+## 6 69 2.7 20 female 27.6 108 70 0.93 0</code></pre>
+<pre class="r"><code>datanogluc &lt;- data[,-1]
+ques6 &lt;- datanogluc
+head(datanogluc)</code></pre>
+<pre><code>## cholratio age gender bmi systbp diastbp waisthipratio
+diabetes
+## 1 3.9 19 female 22.5 118 70 0.84 0
+## 2 3.6 19 female 26.4 108 58 0.83 0
+## 3 4.0 20 female 29.3 110 72 0.89 0
+## 4 3.2 20 female 19.6 122 64 0.79 0
+## 5 2.4 20 female 20.2 122 86 0.82 0
+## 6 2.7 20 female 27.6 108 70 0.93 0</code></pre>
+<pre class="r"><code>test&lt;-manova(cbind(glucose,cholratio, age, bmi, systbp, diastbp, waisthipratio)~gender, data=data)
+summary(test)</code></pre>
+<pre><code>## Df Pillai approx F num Df den Df Pr(&gt;F)
+## gender 1 0.22433 15.782 7 382 &lt; 2.2e-16 ***
+## Residuals 388
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1</code></pre>
+<p>The Manova shows the effect of gender on glucose, cholratio, age, bmi, systbp, diastbp,and waisthipratio. It showed a significant difference were found for at least one of the individual ANOVAs.</p>
+<p><em>If they do, perform univariate ANOVAs to find response(s) showing a mean difference across groups and perform post-hoc t tests to find which groups differ. </em></p>
+<pre class="r"><code>summary.aov(test)</code></pre>
+<pre><code>## Response glucose :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## gender 1 9816 9815.7 3.4125 0.06547 .
+## Residuals 388 1116046 2876.4
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Response cholratio :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## gender 1 12.43 12.4312 4.1553 0.04218 *
+## Residuals 388 1160.75 2.9916
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Response age :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## gender 1 745 744.59 2.7689 0.09692 .
+## Residuals 388 104340 268.92
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Response bmi :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## gender 1 1095.1 1095.15 26.801 3.628e-07 ***
+## Residuals 388 15854.4 40.86
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Response systbp :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## gender 1 255 254.99 0.4873 0.4855
+## Residuals 388 203020 523.25
+##
+## Response diastbp :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## gender 1 358 357.72 1.9682 0.1614
+## Residuals 388 70519 181.75
+##
+## Response waisthipratio :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## gender 1 0.24998 0.24998 52.855 1.996e-12 ***
+## Residuals 388 1.83507 0.00473
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1</code></pre>
+<pre class="r"><code>####the Pairwise post hoc t tests are really not necessary since our categorical variable, Gender, (is not progressive and) has just 2 levels </code></pre>
+<p>The ANOVA for the dependent variables were done to follow the MANOVA test. The univariate ANOVA for the stats suggested that the glucose, cholesterol ratio, age, bmi, and waisthipratio were significantly different by gender. Only BMI, waisthipratio, and Cholratio were significant at significance level of alpha = 0.05.</p>
+<p><em>Discuss the number of tests you have performed, calculate the probability of at least one type I error (if unadjusted), and adjust the significance level accordingly (bonferroni correction) before discussing significant differences</em></p>
+<p>In this case, we have performed 8 tests. We performed 7 anovas and 1 manova totaling to 8. The Pairwise post hoc t tests are really not necessary since our categorical variable, Gender, (is not progressive and) has just 2 levels We adjust the significance level accordingly (bonferroni correction), to get 0.05/8 = 0.0.00625. With this adjusted significance level for controlling Type 1 error rates, only BMI and waist to hip ratio, with p-values of 3.63e-07 and 2e-12 respectively, are significant. Confirmed by the t test, males and females were found to differ significantly from each other in terms of BMI and waist to hip ratio after adjusting for multiple comparisons.</p>
+<p><em>Briefly discuss MANOVA assumptions and whether or not they are likely to have been met (no need for anything too in-depth)</em></p>
+<pre class="r"><code>library(rstatix)
+
+group &lt;- data$gender 
+DVs &lt;- data %&gt;% select(glucose,cholratio, age, bmi, systbp, diastbp, waisthipratio)
+
+#Test multivariate normality for each group (null: assumption met)
+sapply(split(DVs,group), mshapiro_test)</code></pre>
+<pre><code>##           female       male        
+## statistic 0.7831176    0.9482735   
+## p.value   4.496488e-17 1.138393e-05</code></pre>
+<pre class="r"><code>#If any p&lt;.05, stop (assumption violated). If not, test homogeneity of covariance matrices</code></pre>
+<p>We're just going to stop here because the assumptions are already violated. There's no point in testing the homogeneity of covarience matrices. This data fits the usual situation where the data has many 0s, unequal sample sizes, etc and does not meet MANOVA assumptions! Our solution will be to use a randomization test to look at BMIs by gender!</p>
+<p><strong>Question 2</strong></p>
+<p><em>Perform some kind of randomization test on your data (that makes sense). The statistic can be anything you want (mean difference, correlation, F-statistic/ANOVA, chi-squared), etc. State null and alternative hypotheses, perform the test, and interpret the results. Create a plot visualizing the null distribution and the test statistic.</em></p>
+<p><em>Null Hypothesis (Ho): The mean BMI is the same for males and females</em></p>
+<p><em>Alternative Hypothesis (Ha):The mean BMI is different for males and females</em></p>
+<pre class="r"><code>mean_diff &lt;- mean(data[data$gender==&quot;female&quot;,]$cholratio)-mean(data[data$gender==&quot;male&quot;,]$cholratio)
+mean_diff</code></pre>
+<pre><code>## [1] -0.3622969</code></pre>
+<pre class="r"><code>#permutation loop
+rand_dist&lt;-vector()
+for(i in 1:5000){
+new&lt;-data.frame(cholratio=sample(data$cholratio),gender=data$gender)
+rand_dist[i]&lt;-mean(new[new$gender==&quot;female&quot;,]$cholratio) - mean(new[new$gender==&quot;male&quot;,]$cholratio)}
+
+#P-value of permutation test
+mean(rand_dist&lt;mean_diff)*2</code></pre>
+<pre><code>## [1] 0.0448</code></pre>
+<pre class="r"><code>#Independent t-test
+t.test(data=data,cholratio~gender)</code></pre>
+<pre><code>##
+## Welch Two Sample t-test
+##
+## data: cholratio by gender
+## t = -2.0343, df = 344.28, p-value = 0.04269
+## alternative hypothesis: true difference in means is not
+equal to 0
+## 95 percent confidence interval:
+## -0.71259427 -0.01199962
+## sample estimates:
+## mean in group female mean in group male
+## 4.374123 4.736420</code></pre>
+<pre class="r"><code>{hist(rand_dist,main=&quot;&quot;,ylab=&quot;&quot;,); abline(v = mean_diff,col=&quot;red&quot;)}</code></pre>
+<p><img src="../../project/Project2_files/figure-html/unnamed-chunk-4-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>The p-value from the randomization test is 0 which is less than 0.05 of alpha, so we can reject the null hypothesis and state that the mean BMI is different for males and females of those sampled. The randomization data is verified by the independent t test. The graph shows the null distribution and the test statistic.</p>
+<p><strong>Question 3</strong></p>
+<p><em>Build a linear regression model predicting one of your response variables from at least 2 other variables, including their interaction. Mean-center any numeric variables involved in the interaction.</em></p>
+<p><em>Interpret the coefficient estimates (do not discuss significance)</em></p>
+<pre class="r"><code>data$bmi_c&lt;-data$bmi-mean(data$bmi)
+
+fit &lt;- lm(waisthipratio ~ gender + bmi_c + gender*bmi_c, data=data)
+summary(fit)</code></pre>
+<pre><code>##
+## Call:
+## lm(formula = waisthipratio ~ gender + bmi_c + gender *
+bmi_c,
+## data = data)
+##
+## Residuals:
+## Min 1Q Median 3Q Max
+## -0.175392 -0.042565 -0.002796 0.045183 0.284059
+##
+## Coefficients:
+## Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) 0.8587526 0.0044779 191.774 &lt; 2e-16 ***
+## gendermale 0.0629335 0.0071170 8.843 &lt; 2e-16 ***
+## bmi_c 0.0009142 0.0006343 1.441 0.15031
+## gendermale:bmi_c 0.0042500 0.0011357 3.742 0.00021 ***
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Residual standard error: 0.06625 on 386 degrees of
+freedom
+## Multiple R-squared: 0.1875, Adjusted R-squared: 0.1812
+## F-statistic: 29.69 on 3 and 386 DF, p-value: &lt; 2.2e-16</code></pre>
+<p>The intercept estimate is 0.858753, which is the average waist to hip ratio for females with mean BMI and no interaction between gender and BMI. The coefficent estimate of gender is 0.062934 which is how much the average waist to hip ratio increases, when the gender is male. The coefficient of bmi_c, 0.000914, is how much the average waist to hip ratio increases for each 1 unit increase in BMI. The coefficient for gendermale:bmi_c, which is 0.004250, is how much the average waist to hip ratio will additionally increase per unit of BMI increase if the indivual is male.</p>
+<p><em>Plot the regression using ggplot() using geom_smooth(method=“lm”). If your interaction is numeric by numeric, refer to code in the slides to make the plot or check out the interactions package, which makes this easier. If you have 3 or more predictors, just chose two of them to plot for convenience. </em></p>
+<pre class="r"><code>ggplot(data, aes(x=bmi_c, y=waisthipratio, group=gender))+geom_point(aes(color=gender))+
+geom_smooth(method=&quot;lm&quot;,se=F,fullrange=T,aes(color=gender))+theme(legend.position=c(.9,.19))+xlab(&quot;BMI of Individual&quot;)+ ylab(&quot;Waist/Hip Ratio&quot;)+ggtitle(&quot;Interaction between BMI and Gender on Waist/Hip Ratio&quot;)</code></pre>
+<p><img src="../../project/Project2_files/figure-html/unnamed-chunk-6-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>Since the lines by group are not parallel, we know there is interaction between the two terms.</p>
+<p><em>Check assumptions of linearity, normality, and homoskedasticity either graphically or using a hypothesis test</em></p>
+<pre class="r"><code>resids&lt;-fit$residuals; fitvals&lt;-fit$fitted.values
+
+#Linearity
+ggplot(data, aes(x=bmi_c, y=waisthipratio)) + geom_point() + geom_smooth(method = &quot;lm&quot;, se=F)</code></pre>
+<p><img src="../../project/Project2_files/figure-html/unnamed-chunk-7-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>##Homoskedasticity
+ggplot()+geom_point(aes(fitvals,resids))+geom_hline(yintercept=0, col=&quot;red&quot;)</code></pre>
+<p><img src="../../project/Project2_files/figure-html/unnamed-chunk-7-2.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>bptest(fit)</code></pre>
+<pre><code>## 
+##  studentized Breusch-Pagan test
+## 
+## data:  fit
+## BP = 6.8752, df = 3, p-value = 0.07598</code></pre>
+<pre class="r"><code>#Normality
+ggplot()+geom_histogram(aes(resids),bins=20) </code></pre>
+<p><img src="../../project/Project2_files/figure-html/unnamed-chunk-7-3.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot()+geom_qq(aes(sample=resids))+geom_qq()</code></pre>
+<p><img src="../../project/Project2_files/figure-html/unnamed-chunk-7-4.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>shapiro.test(resids)</code></pre>
+<pre><code>## 
+##  Shapiro-Wilk normality test
+## 
+## data:  resids
+## W = 0.98951, p-value = 0.006804</code></pre>
+<p>The numeric variable, waist/hip ratio, does seem to have a linear relationship with BMI + Gender. From the Breusch-Pagan test, we have to reject the null hypothesis of homoskedasticity because the pvalue shows significance. The Shaprio_wilk Test null hypothesis is also rejected becuase the test was also significant. The assumptions of linearity seemed to met, but the assumptions for homoskedasticity and normality were not met. We proceed anyways....</p>
+<p><em>Regardless, recompute regression results with robust standard errors via coeftest(..., vcov=vcovHC(...)). Discuss significance of results, including any changes from before/after robust SEs if applicable.</em></p>
+<pre class="r"><code>#Heteroskedasticity Robust Standard Errors
+coeftest(fit, vcov = vcovHC(fit))</code></pre>
+<pre><code>##
+## t test of coefficients:
+##
+## Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) 0.85875260 0.00480013 178.9018 &lt; 2.2e-16 ***
+## gendermale 0.06293353 0.00754813 8.3376 1.351e-15 ***
+## bmi_c 0.00091416 0.00060753 1.5047 0.1332140
+## gendermale:bmi_c 0.00425005 0.00126721 3.3539 0.0008758
+***
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1</code></pre>
+<p>Since the data did not meet the assumptions, except for linearity, the regression for heteroskadisicty robust standard errors was done. The t-value seem to change a little. Everything else seems to be simliar. Gender and the interaction of gender and BMI are still significant at a = 0.05. The BMI on its own is not.</p>
+<p><em>What proportion of the variation in the outcome does your model explain?</em></p>
+<p>My model explains barely anything, around 18-19% of the variation in the outcome based on the R^2 value from the summary output.</p>
+<p><strong>Question 4</strong></p>
+<p><em>Rerun same regression model (with the interaction), but this time compute bootstrapped standard errors (by resampling observations). Discuss any changes you observe in SEs and p-values using these SEs compared to the original SEs and the robust SEs)</em></p>
+<pre class="r"><code>samp_distn&lt;-replicate(5000, {
+boot_dat&lt;-boot_dat&lt;-data[sample(nrow(data),replace=TRUE),]
+fit &lt;- lm(waisthipratio ~ gender + bmi_c + gender*bmi_c, data=boot_dat)
+coef(fit)
+})
+
+## Estimated SEs
+booterrors &lt;- samp_distn%&gt;%t%&gt;%as.data.frame%&gt;%summarize_all(sd)
+booterrors</code></pre>
+<pre><code>##   (Intercept)  gendermale        bmi_c gendermale:bmi_c
+## 1 0.004792344 0.007436288 0.0006144632      0.001219299</code></pre>
+<pre class="r"><code>bootSEs &lt;- t(rbind(coeftest(fit)[,1],booterrors))
+colnames(bootSEs)&lt;- c(&quot;Estimate&quot;, &quot;Std. Error&quot;)
+
+
+## Empirical 95% CI
+samp_distn%&gt;%t%&gt;%as.data.frame%&gt;%gather%&gt;%group_by(key)%&gt;%
+summarize(lower=quantile(value,.025), upper=quantile(value,.975))</code></pre>
+<pre><code>## # A tibble: 4 x 3
+##   key                  lower   upper
+##   &lt;chr&gt;                &lt;dbl&gt;   &lt;dbl&gt;
+## 1 (Intercept)       0.849    0.868  
+## 2 bmi_c            -0.000270 0.00213
+## 3 gendermale        0.0479   0.0768 
+## 4 gendermale:bmi_c  0.00189  0.00667</code></pre>
+<pre class="r"><code>(coeftest(fit)[,1:2]) ## Normal-theory SEs</code></pre>
+<pre><code>##                      Estimate   Std. Error
+## (Intercept)      0.8587525956 0.0044779291
+## gendermale       0.0629335309 0.0071169559
+## bmi_c            0.0009141584 0.0006342625
+## gendermale:bmi_c 0.0042500479 0.0011357181</code></pre>
+<pre class="r"><code>coeftest(fit, vcov=vcovHC(fit))[,1:2] ## Robust SEs</code></pre>
+<pre><code>##                      Estimate   Std. Error
+## (Intercept)      0.8587525956 0.0048001347
+## gendermale       0.0629335309 0.0075481311
+## bmi_c            0.0009141584 0.0006075275
+## gendermale:bmi_c 0.0042500479 0.0012672128</code></pre>
+<pre class="r"><code>bootSEs ## Bootstrapped by observation SEs</code></pre>
+<pre><code>##                      Estimate   Std. Error
+## (Intercept)      0.8587525956 0.0047923443
+## gendermale       0.0629335309 0.0074362881
+## bmi_c            0.0009141584 0.0006144632
+## gendermale:bmi_c 0.0042500479 0.0012192990</code></pre>
+<p>The data was rerun using the bootstrapped standard errors, because it was non-normal. The bootstrp standrd error using the row resmapling were ever so slightly lower than the robust heteroskedatic errors and a little lower than the orignal standard error. The bootstrapped standard error using the residual sampling were the same to the boot strapped stanrd error using the row sampling. The 95% confidence outputted above includes 0 for bmi_c so we know it is not significant.</p>
+<p><strong>Question 5</strong></p>
+<p><em>Fit a logistic regression model predicting a binary variable (if you don’t have one, make/get one) from at least two explanatory variables (interaction not necessary).</em></p>
+<p><em>Going to try to predict diabetes WITHOUT using glucose as a variable to make things more interesting!</em></p>
+<pre class="r"><code>fit &lt;- glm(diabetes ~ systbp + waisthipratio, data=datanogluc, family=&quot;binomial&quot;)
+summary(fit)</code></pre>
+<pre><code>##
+## Call:
+## glm(formula = diabetes ~ systbp + waisthipratio, family
+= &quot;binomial&quot;,
+## data = datanogluc)
+##
+## Deviance Residuals:
+## Min 1Q Median 3Q Max
+## -1.3610 -0.5866 -0.4812 -0.3784 2.4456
+##
+## Coefficients:
+## Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept) -9.687887 1.906442 -5.082 3.74e-07 ***
+## systbp 0.019667 0.005797 3.392 0.000693 ***
+## waisthipratio 5.831991 1.952509 2.987 0.002818 **
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## (Dispersion parameter for binomial family taken to be 1)
+##
+## Null deviance: 334.87 on 389 degrees of freedom
+## Residual deviance: 311.81 on 387 degrees of freedom
+## AIC: 317.81
+##
+## Number of Fisher Scoring iterations: 5</code></pre>
+<pre class="r"><code>exp(coef(fit))</code></pre>
+<pre><code>##   (Intercept)        systbp waisthipratio 
+##  6.203032e-05  1.019861e+00  3.410369e+02</code></pre>
+<pre class="r"><code>#dividing log odds by 10 to get every 0.1 unit increase in waist hip ratio instead of 1 
+exp(0.00282/10)</code></pre>
+<pre><code>## [1] 1.000282</code></pre>
+<p>When controlling for waist to hip ratio,there is a signficant effect of systolic blood pressure on the odds of diabetes of the individual. Every gain in 1 unit in systolic blood pressire mutliples the odds of being diabetic by 1.01986. Controlling for systolic blood pressure, there is a signficant effect of waist to hip ratio on the odds of diabetes. For each 0.1 unit increase in waist hip ratio, the odds of having diabetes increase by 1.00028.</p>
+<p><em>Report a confusion matrix for your logistic regression. Compute and discuss the Accuracy, Sensitivity (TPR), Specificity (TNR), Precision (PPV), and AUC of your model</em></p>
+<pre class="r"><code>datanogluc&lt;- datanogluc%&gt;%mutate(prob=predict(fit, type=&quot;response&quot;), prediction=ifelse(prob&gt;.5,1,0))
+classify&lt;-datanogluc%&gt;%transmute(prob,prediction,truth=diabetes)
+table(prediction=classify$prediction,truth=classify$truth)%&gt;%addmargins()</code></pre>
+<pre><code>##           truth
+## prediction   0   1 Sum
+##        0   326  60 386
+##        1     4   0   4
+##        Sum 330  60 390</code></pre>
+<pre class="r"><code>#accuracy
+(327+1)/390</code></pre>
+<pre><code>## [1] 0.8410256</code></pre>
+<pre class="r"><code>#sensitivity (tpr)
+0/60</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>#specificity tnr
+326/330</code></pre>
+<pre><code>## [1] 0.9878788</code></pre>
+<pre class="r"><code>#precision ppv
+0/4</code></pre>
+<pre><code>## [1] 0</code></pre>
+<p>The accurary gives us the propotion of predicted diabetics who are actually diabetics and predicted nondiabetics who are truly nondiabetic from the total and is 0.841026. The sensitivity or the proportion of diabetics correctly classified is 0 which is not very good. The specificity or true negative rate, proportion of nondiabetics who are correctly classified is much better at 0.987879. The precision or proportion classified diabetic who actually are is 0. This model is lacking because it is unable to find a predictor that is shared by the diabetics. The AUC will be discussed below with the ROC plot.</p>
+<p><em>Using ggplot, make a density plot of the log-odds (logit) colored/grouped by your binary outcome variable</em></p>
+<pre class="r"><code>datanogluc$odds &lt;- (datanogluc$prob)/(1-datanogluc$prob)
+datanogluc$logit&lt;-log(datanogluc$odds)
+ggplot(datanogluc)+geom_density(aes(logit, fill=as.factor(diabetes)), alpha=0.3)</code></pre>
+<p><img src="../../project/Project2_files/figure-html/unnamed-chunk-12-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p><em>class_diag to verify Accuracy, Sensitivity (TPR), Specificity (TNR), Precision (PPV)</em></p>
+<pre class="r"><code>datanogluc$prob &lt;- predict(fit, type=&quot;response&quot;)
+class_diag&lt;-function(probs,truth){
+  
+  tab&lt;-table(factor(probs&gt;.5,levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),truth)
+  acc=sum(diag(tab))/sum(tab)
+  sens=tab[2,2]/colSums(tab)[2]
+  spec=tab[1,1]/colSums(tab)[1]
+  ppv=tab[2,2]/rowSums(tab)[2]
+  f1=2*(sens*ppv)/(sens+ppv)
+  
+  if(is.numeric(truth)==FALSE &amp; is.logical(truth)==FALSE) truth&lt;-as.numeric(truth)-1
+  
+  #CALCULATE EXACT AUC
+  ord&lt;-order(probs, decreasing=TRUE)
+  probs &lt;- probs[ord]; truth &lt;- truth[ord]
+  
+  TPR=cumsum(truth)/max(1,sum(truth)) 
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  
+  dup&lt;-c(probs[-1]&gt;=probs[-length(probs)], FALSE)
+  TPR&lt;-c(0,TPR[!dup],1); FPR&lt;-c(0,FPR[!dup],1)
+  
+  n &lt;- length(TPR)
+  auc&lt;- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+  
+  data.frame(acc,sens,spec,ppv,f1,auc)
+}
+
+class_diag(datanogluc$prob,datanogluc$diabetes)</code></pre>
+<pre><code>##         acc sens      spec ppv  f1       auc
+## 1 0.8358974    0 0.9878788   0 NaN 0.7015657</code></pre>
+<p><em>Generate an ROC curve (plot) and calculate AUC (either manually or with a package); interpret</em></p>
+<pre class="r"><code>ROCplot&lt;-ggplot(classify)+geom_roc(aes(d=truth,m=prob), n.cuts=0)
+ROCplot</code></pre>
+<p><img src="../../project/Project2_files/figure-html/unnamed-chunk-14-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>calc_auc(ROCplot)</code></pre>
+<pre><code>##   PANEL group       AUC
+## 1     1    -1 0.7015657</code></pre>
+<p>The AUC of the model is 0.701566, which is just barely into Fair. ROC curve lets us visualize trade-off between sensitivity and specificity and the closer it is to a right angle the better. This is not very right angular. Systolic BP and waist to hip ratio in a model make for a not great predictor of diabetes.</p>
+<p><strong>Question 6</strong></p>
+<p><em>Perform a logistic regression predicting the same binary response variable from ALL of the rest of your variables (the more, the better!)</em></p>
+<p><em>Fit model, compute in-sample classification diagnostics (Accuracy, Sensitivity, Specificity, Precision, AUC), and interpret.</em></p>
+<pre class="r"><code>datanogluc &lt;- ques6
+
+set.seed(8)
+fit &lt;- glm(diabetes ~ ., data=datanogluc, family=&quot;binomial&quot;)
+prob &lt;- predict(fit, type=&quot;response&quot;)
+class_diag&lt;-function(probs,truth){
+  
+  tab&lt;-table(factor(probs&gt;.5,levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),truth)
+  acc=sum(diag(tab))/sum(tab)
+  sens=tab[2,2]/colSums(tab)[2]
+  spec=tab[1,1]/colSums(tab)[1]
+  ppv=tab[2,2]/rowSums(tab)[2]
+  f1=2*(sens*ppv)/(sens+ppv)
+  
+  if(is.numeric(truth)==FALSE &amp; is.logical(truth)==FALSE) truth&lt;-as.numeric(truth)-1
+  
+  #CALCULATE EXACT AUC
+  ord&lt;-order(probs, decreasing=TRUE)
+  probs &lt;- probs[ord]; truth &lt;- truth[ord]
+  
+  TPR=cumsum(truth)/max(1,sum(truth)) 
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  
+  dup&lt;-c(probs[-1]&gt;=probs[-length(probs)], FALSE)
+  TPR&lt;-c(0,TPR[!dup],1); FPR&lt;-c(0,FPR[!dup],1)
+  
+  n &lt;- length(TPR)
+  auc&lt;- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+  
+  data.frame(acc,sens,spec,ppv,f1,auc)
+}
+
+class_diag(prob,datanogluc$diabetes)</code></pre>
+<pre><code>##         acc sens      spec       ppv        f1       auc
+## 1 0.8358974 0.15 0.9606061 0.4090909 0.2195122 0.8082323</code></pre>
+<p>If we use every variable from the data set without glucose as a predictor of diabetes, the model is improved to an AUC of 0.808232 which is good, for in sample classification. The accurary gives us the propotion of predicted diabetics who are actually diabetics and predicted nondiabetics who are truly nondiabetic from the total and is 0.835897. The sensitivity or the proportion of diabetics correctly classified is 0.15 which is not very good. The specificity or true negative rate, proportion of nondiabetics who are correctly classified is much better than the true positive rate at 0.960606. The precision or proportion classified diabetic who actually are is 0.409091. This model is still lacking because it is not good at predicting people who do in fact have diabetes.</p>
+<p><em>Perform 10-fold (or repeated random sub-sampling) CV with the same model and report average out-of-sample classification diagnostics (Accuracy, Sensitivity, Specificity, Precision, and AUC); interpret AUC and compare with the in-sample metrics.</em></p>
+<pre class="r"><code>datanogluc &lt;- ques6
+
+set.seed(8)
+k=10
+
+data1&lt;-datanogluc %&gt;% sample_frac #put dataset in random order
+folds&lt;-ntile(1:nrow(datanogluc),n=10) #create folds
+
+diags&lt;-NULL
+for(i in 1:k){          # FOR EACH OF 10 FOLDS
+  train&lt;-data1[folds!=i,] # CREATE TRAINING SET
+  test&lt;-data1[folds==i,]  # CREATE TESTING SET
+  truth&lt;-test$diabetes
+  
+  fit&lt;- glm(diabetes~., data=train, family=&quot;binomial&quot;)
+  probs&lt;- predict(fit, newdata=test,type=&quot;response&quot; )
+  
+  diags&lt;-rbind(diags,class_diag(probs,truth)) #CV DIAGNOSTICS FOR EACH FOLD
+}
+
+summarize_all(diags,mean)</code></pre>
+<pre><code>##         acc      sens      spec ppv  f1       auc
+## 1 0.8307692 0.1080952 0.9608042 NaN NaN 0.7657792</code></pre>
+<p>If we use every variable from the data set without glucose as a predictor of diabetes for out of sample data, the model is has an AUC of 0.765779 which is fair. The accurary gives us the propotion of predicted diabetics who are actually diabetics and predicted nondiabetics who are truly nondiabetic from the total and is 0.830769. The sensitivity or the proportion of diabetics correctly classified is 0.108095 which is bad. The specificity or true negative rate, proportion of nondiabetics who are correctly classified is still much better at 0.960804. The precision or proportion classified diabetic who actually are is NaN. This model is still lacking because it is not good at predicting people who do in fact have diabetes. It did moderate in sample and has done worse out of sample.</p>
+<p><em>Perform LASSO on the same model/variables. Choose lambda to give the simplest model whose accuracy is near that of the best (i.e., lambda.1se). Discuss which variables are retained.</em></p>
+<pre class="r"><code>datanogluc &lt;- ques6
+
+library(glmnet)
+set.seed(10)
+
+y&lt;-as.matrix(datanogluc$diabetes) #grab response
+data_preds&lt;-model.matrix(diabetes~.,data=datanogluc)[,-1]
+head(data_preds)</code></pre>
+<pre><code>## cholratio age gendermale bmi systbp diastbp
+waisthipratio
+## 1 3.9 19 0 22.5 118 70 0.84
+## 2 3.6 19 0 26.4 108 58 0.83
+## 3 4.0 20 0 29.3 110 72 0.89
+## 4 3.2 20 0 19.6 122 64 0.79
+## 5 2.4 20 0 20.2 122 86 0.82
+## 6 2.7 20 0 27.6 108 70 0.93</code></pre>
+<pre class="r"><code>cv&lt;-cv.glmnet(data_preds,y,family=&quot;binomial&quot;)
+lasso_fit&lt;-glmnet(data_preds,y,family=&quot;binomial&quot;,lambda=cv$lambda.1se)
+
+coef(lasso_fit)</code></pre>
+<pre><code>## 8 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                        s0
+## (Intercept)   -3.22008837
+## cholratio      0.11524482
+## age            0.02000936
+## gendermale     .         
+## bmi            .         
+## systbp         .         
+## diastbp        .         
+## waisthipratio  .</code></pre>
+<pre class="r"><code>prob &lt;- predict(lasso_fit, data_preds, type=&quot;response&quot;)
+
+class_diag(prob,datanogluc$diabetes)</code></pre>
+<pre><code>##         acc       sens spec ppv         f1       auc
+## 1 0.8487179 0.01666667    1   1 0.03278689 0.7911111</code></pre>
+<p>After running the lasso regression on the linear model predicitng diabetes from all the other variavles (other than glucose), the variables of cholesterol/hdl ratio as well as age are significant.</p>
+<p><em>Perform 10-fold CV using only the variables lasso selected: compare model’s out-of-sample AUC to that of your logistic regressions above</em></p>
+<pre class="r"><code>datanogluc &lt;- ques6
+
+set.seed(4)
+k=10
+
+data1&lt;-datanogluc %&gt;% sample_frac #put dataset in random order
+folds&lt;-ntile(1:nrow(datanogluc),n=10) #create folds
+
+diags&lt;-NULL
+for(i in 1:k){          # FOR EACH OF 10 FOLDS
+  train&lt;-data1[folds!=i,] # CREATE TRAINING SET
+  test&lt;-data1[folds==i,]  # CREATE TESTING SET
+  truth&lt;-test$diabetes
+  
+  fit&lt;- glm(diabetes~ cholratio + age, data=train, family=&quot;binomial&quot;)
+  probs&lt;- predict(fit, newdata=test,type=&quot;response&quot; )
+  
+  diags&lt;-rbind(diags,class_diag(probs,truth)) #CV DIAGNOSTICS FOR EACH FOLD
+}
+
+summarize_all(diags,mean)</code></pre>
+<pre><code>##         acc       sens      spec ppv  f1       auc
+## 1 0.8307692 0.06666667 0.9696253 NaN NaN 0.8097907</code></pre>
+<p>If we use cholesterol/HDL ratio and age from the data set without glucose as predictors of diabetes for out of sample data, the model is has an AUC of 0.809791 which is marginally improved from using every predictor. The accurary gives us the propotion of predicted diabetics who are actually diabetics and predicted nondiabetics who are truly nondiabetic from the total and is 0.830769. The sensitivity or the proportion of diabetics correctly classified is 0.0666667 which is bad. The specificity or true negative rate, proportion of nondiabetics who are correctly classified is still much better at 0.969625. The precision or proportion classified diabetic who actually are is NaN. Overall this model is a bit better than the original model because the in sample AUC didn't change much and the out of sample improved.</p>
+<p>Turns out you can't really predict diabetes well without glucose.</p>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="../../js/docs.min.js"></script>
+<script src="../../js/main.js"></script>
+
+<script src="../../js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

@@ -1,0 +1,260 @@
+---
+title: 'Project 1: Exploratory Data Analysis'
+author: "SDS348"
+date: ''
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+  pdf_document:
+    toc: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
+```
+
+## Data Wrangling and Data Exploration
+
+For this project I decided to look at some interesting datasets pertaining to countries. The happiness scores and rankings use data from the Gallup World Poll. The scores are from nationally representative samples for the year 2019 and use the Gallup weights to make the estimates representative. The columns following the happiness score estimate the extent to which each of six factors – economic production, social support, life expectancy, freedom, absence of corruption, and generosity – contribute to making life evaluations higher. The reports review the state of happiness in the world today and show how the new science of happiness explains personal and national variations in happiness. The next file that I used was a dataset containing a compilation of demographic information for all of the world’s countries. It includes variables such as GDP, birth rates, death rates, HIV rates, infant mortality rates, etc. Even though the data doesn’t include any specific variables relating to cultural, social or political aspects, some implicit information (such as a country’s level of development, general health standards and economic contribution) can be drawn. 
+
+More specifically the happiness data set contains variables that tell us information about the name of the country, the happiness score, the GDP per capita, the social support score, the healthy individual life expectancy, the freedom to make choices score, the generosity score, and the perception of corruption in the country score of which we kept the happiness score and the generosity score. There are 140 observations in this dataset. The second dataset has 45 variables of which we kept the HIV prevalence per 1000 people and the infant mortality number per 1000 live births. There are 156 observations in this dataset. I thought this data was interesting because I recently heard about the happiness metric in Bhutan and I thought it would be interesting to see if there was a correlation between "happier" countries and better health outcomes or higher generosity scores. I do expect there to be lower infant mortality rates and lower HIV rates in the "happier" countries but I do not expect there to be a difference in the generosity scores. 
+
+### Instructions
+
+### Find data
+
+### Guidelines
+
+1. If the datasets are not tidy, you will need to reshape them so that every observation has its own row and every variable its own column. If the datasets are both already tidy, you will make them untidy with `pivot_wider()/spread()` and then tidy them again with `pivot_longer/gather()` to demonstrate your use of the functions. It's fine to wait until you have your descriptives to use these functions (e.g., you might want to pivot_wider() to rearrange the data to make your descriptive statistics easier to look at); it's fine long as you use them at least once!
+
+```{r}
+getwd()
+data1 <- read.csv("nineteen.csv")
+data2 <- read.csv("factbook.csv", sep=";")
+data1 <- data1[,-1]
+
+```
+
+2. Join your 2+ separate data sources into a single dataset based on a common ID variable! If you can't find a good pair datasets to join, you may split one main dataset into two different datasets with a common ID variable in each, and then join them back together based on that common ID, but this is obviously less than ideal.
+
+```{r}
+library(dplyr)
+data <- inner_join(data1, data2, by = c("Country.or.region"="Country")) 
+data <- data %>% 
+  select(1,2,7,20,26)
+data$Infant.mortality.rate.deaths.1000.live.births. <-  as.numeric(data$Infant.mortality.rate.deaths.1000.live.births.)
+data$HIV.AIDS...adult.prevalence.rate... <- as.numeric(levels(data$HIV.AIDS...adult.prevalence.rate...))[data$HIV.AIDS...adult.prevalence.rate...]
+head(data)
+
+
+```
+
+
+3. Create summary statistics
+
+```{r}
+
+data <- data %>% filter (!is.na(HIV.AIDS...adult.prevalence.rate...))
+
+data %>% 
+  mutate(infantmoralityperc = Infant.mortality.rate.deaths.1000.live.births./1000*100) %>%
+  mutate(upper = (Score > quantile(Score,0.5)))
+
+data %>% 
+  arrange(desc(HIV.AIDS...adult.prevalence.rate...))
+
+data %>% 
+  filter (!is.na(HIV.AIDS...adult.prevalence.rate...)) %>%
+  mutate(infantmoralityperc = Infant.mortality.rate.deaths.1000.live.births./1000*100) %>%
+  mutate(upper = (Score > quantile(Score,0.5))) %>%
+  group_by(upper) %>%
+  summarize(meaninfant = mean(infantmoralityperc), sdinfant = sd(infantmoralityperc), mininfant = min(infantmoralityperc), maxinfant = max(infantmoralityperc), meangen = mean(Generosity), sdgen = sd(Generosity), mingen = min(Generosity), maxgen = max(Generosity),meanHIV = mean(HIV.AIDS...adult.prevalence.rate...), sdHIV = sd(HIV.AIDS...adult.prevalence.rate...), minHIV = min(HIV.AIDS...adult.prevalence.rate...), maxHIV = max(HIV.AIDS...adult.prevalence.rate...),n = n()) 
+
+numericdata <- data[,-1]
+correlations <- cor(numericdata)
+correlations
+
+
+```
+  The summary data tells us that for the countries below the median happiness score, the meaninfant, sdinfant, mininfant, maxinfant, meangen, sdgen, mingen, maxgen, meanHIV	are 12.54714	6.908275	0.4	22.2	0.1822286	0.09800150	0.000	0.498	and 4.8761429	respectively. 
+  
+The summary data tells us that for the countries above the median happiness score, the meaninfant, sdinfant, mininfant, maxinfant, meangen, sdgen, mingen, maxgen, meanHIV	are 10.46857	5.391339	0.8	21.1	0.1824571	0.09023796	0.043	0.375	and 0.3685714	respectively. 
+
+4. Make visualizations (three plots)
+
+```{r}
+library(reshape2)
+melted <- melt(correlations)
+head(melted)
+library(ggplot2)
+ggplot(data = melted, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile()
+
+# Heatmap
+library(ggplot2)
+ggplot(data = melted, aes(Var2, Var1, fill = value))+
+ geom_tile(color = "white")+
+ scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+   midpoint = 0, limit = c(-1,1), space = "Lab", 
+   name="Pearson\nCorrelation") +
+  theme_minimal()+ 
+ theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+    size = 12, hjust = 1))+
+ coord_fixed()
+
+```
+
+    
+```{r}
+data <- data %>% mutate(infantmoralityperc = Infant.mortality.rate.deaths.1000.live.births./1000*100) %>%
+  mutate(upper = (Score > quantile(Score,0.5)))
+
+p2 <- ggplot(data, aes(x=infantmoralityperc, y=Generosity, color=upper)) +
+  geom_point() + 
+  geom_smooth(method=lm, aes(fill=upper)) 
+
+p2 + labs(title = "Scatterplot of Generosity and Infant Mortality grouped by upper/lower happiness",x = "Infant Mortality Per 1000")
+
+data2 <- data %>% 
+  filter (!is.na(HIV.AIDS...adult.prevalence.rate...)) %>%
+  mutate(HIVupper = (HIV.AIDS...adult.prevalence.rate... > quantile(HIV.AIDS...adult.prevalence.rate...,0.5)))
+
+p1 <- ggplot(data2, aes(x=HIVupper,y=infantmoralityperc)) +
+  geom_boxplot()
+p1 + stat_summary(fun.y = "mean", geom = "point", size = 5, color = "purple", shape = 15) +
+  geom_point(aes(color = upper, width = .05))+ labs(title = "Boxplot of Infant Mortality Per 1000 grouped by upper/lower HIV Prevalence",x = "Above 50th Percentile for HIV Prevalence", y = "Infant Mortality Per 1000", colour = "Above 50th Percentile Happiness Score")
+
+```
+    
+The first graph shows a Scatterplot of Generosity and Infant Mortality grouped by upper/lower happiness. We can see that there is almost full overlap between the two groups. There are no clear patterns and the generosity score seems to be consistent/randomly varied regardless of happiness score or infant mortality. 
+
+The second graph shows a Boxplot of Infant Mortality Per 1000 grouped by upper/lower HIV Prevalence. We can see that there is a lot of overlap between the two groups. There is more variation in the countries that have HIV prevalence above the median. The mean is plotted in purple square and each individual data point is plotted according to their happiness score relative quantile as well. There do seem to be more countries below the median happiness score in the above the median HIV prevalence box but it is not as distinct as one might have thought. 
+    
+5. Perform k-means/PAM clustering or PCA on (at least) your numeric variables.
+
+
+```{r}
+clust_dat<-data%>%dplyr::select(Score,Generosity,HIV.AIDS...adult.prevalence.rate...,Infant.mortality.rate.deaths.1000.live.births.)
+
+library(cluster)
+sil_width<-vector() #empty vector to hold mean sil width
+for(i in 2:10){
+  kms <- kmeans(clust_dat,centers=i) #compute k-means solution
+  sil <- silhouette(kms$cluster,dist(clust_dat)) #get sil widths
+  sil_width[i]<-mean(sil[,3]) #take averages (higher is better)
+} 
+ggplot()+geom_line(aes(x=1:10,y=sil_width))+scale_x_continuous(name="k",breaks=1:10)
+
+pam1<-clust_dat%>%pam(k=2)
+pam1
+
+library(GGally)
+
+data %>% mutate(cluster=as.factor(pam1$clustering)) %>% 
+  ggpairs(columns = c("Score","Generosity","HIV.AIDS...adult.prevalence.rate...","Infant.mortality.rate.deaths.1000.live.births."), aes(color=cluster))
+
+plot(pam1, which=2)
+plot(pam1, which=1)
+
+eig1 <- data %>% dplyr::select(Score,Generosity,HIV.AIDS...adult.prevalence.rate...,Infant.mortality.rate.deaths.1000.live.births.) %>% cor() %>% eigen()
+eig1
+eig1$vectors
+eig1$values
+
+matA <- matrix(data %>% dplyr::select(Score,Generosity,HIV.AIDS...adult.prevalence.rate...,Infant.mortality.rate.deaths.1000.live.births.) %>% scale(), nrow=140)
+
+matA
+matB <- matrix(eig1$vectors, nrow=4)
+PCAscores <- matA %*% matB 
+
+plot(PCAscores)
+
+
+data%>%mutate(PC1=PCAscores[,1], PC2=PCAscores[,2])%>%
+  ggplot(aes(PC1,PC2,color=upper))+geom_point()
+```
+
+    - Include all steps as we discuss in class, including a visualization.
+
+    - If you don't have at least 3 numeric variables, or you want to cluster based on categorical variables too, convert them to factors in R, generate Gower's dissimilarity matrix on the data, and do PAM clustering on the dissimilarities.
+    
+    - Show how you chose the final number of clusters/principal components 
+    
+    - Interpret the final clusters/principal components 
+
+    - For every step, document what your code does (in words) and what you see in the data!     
+
+<P style="page-break-before: always">
+\newpage
+    
+### Rubric
+
+Prerequisite: Finding appropriate data from at least two sources per the instructions above: Failure to do this will result in a 0! You will submit a .Rmd file and a knitted document (pdf).
+
+#### 0. Introduction (4  pts)
+
+- Write a narrative introductory paragraph or two describing the datasets you have chosen, the variables they contain, how they were acquired, and why they are interesting to you. Expand on potential associations you may expect, if any.
+
+#### 1. Tidying: Rearranging Wide/Long (8 pts)
+
+- Tidy the datasets (using the `tidyr` functions `pivot_longer`/`gather` and/or `pivot_wider`/`spread`) 
+- If you data sets are already tidy, be sure to use those functions somewhere else in your project
+- Document the process (describe in words what was done per the instructions)
+    
+#### 2. Joining/Merging (8 pts)
+
+- Join your datasets into one using a `dplyr` join function
+- If you have multiple observations on the joining variable in either dataset, fix this by collapsing via summarize
+- Discuss the process in words, including why you chose the join you did
+- Discuss which cases were dropped, if any, and potential problems with this
+
+#### 3. Wrangling (40 pts)
+
+- Use all six core `dplyr` functions in the service of generating summary statistics (18 pts)
+    - Use mutate at least once to generate a variable that is a function of at least one other variable
+
+- Compute at least 10 summary statistics for using summarize and summarize with group_by (18 pts)
+    - Use at least 5 unique functions inside of summarize (e.g., mean, sd)
+    - At least 2 of these should group by a categorical variable. Create one by dichotomizing a numeric if necessary
+    - If applicable, at least 1 of these should group by two categorical variables
+    - Strongly encouraged to create a correlation matrix with `cor()` on your numeric variables
+
+- Summarize/discuss all results in no more than two paragraphs (4 pts)
+
+
+#### 4. Visualizing (30 pts)
+
+- Create a correlation heatmap of your numeric variables
+
+- Create two effective, polished plots with ggplot
+
+    - Each plot should map 3+ variables to aesthetics 
+    - Each plot should have a title and clean labeling for all mappings
+    - Change at least one default theme element and color for at least one mapping per plot
+    - For at least one plot, add more tick marks (x, y, or both) than are given by default
+    - For at least one plot, use the stat="summary" function
+    - Supporting paragraph or two (for each plot) describing the relationships/trends that are apparent
+    
+#### 5. Dimensionality Reduction (20 pts) 
+
+- Either k-means/PAM clustering or PCA (inclusive "or") should be performed on at least three numeric variables in your dataset
+
+    - All relevant steps discussed in class 
+    - A visualization of the clusters or the first few principal components (using ggplot2)
+    - Supporting paragraph or two describing results found 
+
+
+#### 6. Neatness!
+
+- Your project should not knit to more than 30 or so pages (probably closer to 10)! You will lose points if you print out your entire dataset(s), have terrible formatting, etc. If you start your project in a fresh .Rmd file, you are advised to paste the set-up code from this document (lines 14-17) at the top of it: this will automatically truncate if you accidentally print out a huge dataset, etc. Imagine this is a polished report you are giving to your PI or boss to summarize your work researching a topic.
+
+...
+
+
+
+
+
