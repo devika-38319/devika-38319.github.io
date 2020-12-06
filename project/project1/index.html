@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Devika Godbole" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="../../img/favicon.ico">
+    <title>Project 1: Exploratory Data Analysis</title>
+    <meta name="generator" content="Hugo 0.79.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="../../"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="../../post/">BLOG</a></li>
+        
+        <li><a href="../../projects/">PROJECTS</a></li>
+        
+        <li><a href="../../resume/">CV</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="../../project/project1/">Project 1: Exploratory Data Analysis</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<div id="data-wrangling-and-data-exploration" class="section level2">
+<h2>Data Wrangling and Data Exploration</h2>
+<p>For this project I decided to look at some interesting datasets pertaining to countries. The happiness scores and rankings use data from the Gallup World Poll. The scores are from nationally representative samples for the year 2019 and use the Gallup weights to make the estimates representative. The columns following the happiness score estimate the extent to which each of six factors – economic production, social support, life expectancy, freedom, absence of corruption, and generosity – contribute to making life evaluations higher. The reports review the state of happiness in the world today and show how the new science of happiness explains personal and national variations in happiness. The next file that I used was a dataset containing a compilation of demographic information for all of the world’s countries. It includes variables such as GDP, birth rates, death rates, HIV rates, infant mortality rates, etc. Even though the data doesn’t include any specific variables relating to cultural, social or political aspects, some implicit information (such as a country’s level of development, general health standards and economic contribution) can be drawn.</p>
+<p>More specifically the happiness data set contains variables that tell us information about the name of the country, the happiness score, the GDP per capita, the social support score, the healthy individual life expectancy, the freedom to make choices score, the generosity score, and the perception of corruption in the country score of which we kept the happiness score and the generosity score. There are 140 observations in this dataset. The second dataset has 45 variables of which we kept the HIV prevalence per 1000 people and the infant mortality number per 1000 live births. There are 156 observations in this dataset. I thought this data was interesting because I recently heard about the happiness metric in Bhutan and I thought it would be interesting to see if there was a correlation between &quot;happier&quot; countries and better health outcomes or higher generosity scores. I do expect there to be lower infant mortality rates and lower HIV rates in the &quot;happier&quot; countries but I do not expect there to be a difference in the generosity scores.</p>
+<div id="instructions" class="section level3">
+<h3>Instructions</h3>
+</div>
+<div id="find-data" class="section level3">
+<h3>Find data</h3>
+</div>
+<div id="guidelines" class="section level3">
+<h3>Guidelines</h3>
+<ol style="list-style-type: decimal">
+<li>If the datasets are not tidy, you will need to reshape them so that every observation has its own row and every variable its own column. If the datasets are both already tidy, you will make them untidy with <code>pivot_wider()/spread()</code> and then tidy them again with <code>pivot_longer/gather()</code> to demonstrate your use of the functions. It's fine to wait until you have your descriptives to use these functions (e.g., you might want to pivot_wider() to rearrange the data to make your descriptive statistics easier to look at); it's fine long as you use them at least once!</li>
+</ol>
+<pre class="r"><code>getwd()</code></pre>
+<pre><code>## [1] &quot;/stor/home/ddg2229/website/content/project&quot;</code></pre>
+<pre class="r"><code>data1 &lt;- read.csv(&quot;nineteen.csv&quot;)
+data2 &lt;- read.csv(&quot;factbook.csv&quot;, sep = &quot;;&quot;)
+data1 &lt;- data1[, -1]</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Join your 2+ separate data sources into a single dataset based on a common ID variable! If you can't find a good pair datasets to join, you may split one main dataset into two different datasets with a common ID variable in each, and then join them back together based on that common ID, but this is obviously less than ideal.</li>
+</ol>
+<pre class="r"><code>library(dplyr)
+data &lt;- inner_join(data1, data2, by = c(Country.or.region = &quot;Country&quot;))
+data &lt;- data %&gt;% select(1, 2, 7, 20, 26)
+data$Infant.mortality.rate.deaths.1000.live.births. &lt;- as.numeric(data$Infant.mortality.rate.deaths.1000.live.births.)
+data$HIV.AIDS...adult.prevalence.rate... &lt;- as.numeric(levels(data$HIV.AIDS...adult.prevalence.rate...))[data$HIV.AIDS...adult.prevalence.rate...]
+head(data)</code></pre>
+<pre><code>##   Country.or.region Score Generosity HIV.AIDS...adult.prevalence.rate...
+## 1           Finland 7.769      0.153                                 0.1
+## 2           Denmark 7.600      0.252                                 0.2
+## 3            Norway 7.554      0.271                                 0.1
+## 4           Iceland 7.494      0.354                                 0.2
+## 5       Netherlands 7.488      0.322                                 0.2
+## 6       Switzerland 7.480      0.263                                 0.4
+##   Infant.mortality.rate.deaths.1000.live.births.
+## 1                                             91
+## 2                                            110
+## 3                                             92
+## 4                                             90
+## 5                                            127
+## 6                                            107</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Create summary statistics</li>
+</ol>
+<pre class="r"><code>data &lt;- data %&gt;% filter(!is.na(HIV.AIDS...adult.prevalence.rate...))
+
+data %&gt;% mutate(infantmoralityperc = Infant.mortality.rate.deaths.1000.live.births./1000 * 
+    100) %&gt;% mutate(upper = (Score &gt; quantile(Score, 0.5)))</code></pre>
+<pre><code>##    Country.or.region Score Generosity HIV.AIDS...adult.prevalence.rate...
+## 1            Finland 7.769      0.153                                 0.1
+## 2            Denmark 7.600      0.252                                 0.2
+## 3             Norway 7.554      0.271                                 0.1
+## 4            Iceland 7.494      0.354                                 0.2
+## 5        Netherlands 7.488      0.322                                 0.2
+## 6        Switzerland 7.480      0.263                                 0.4
+## 7             Sweden 7.343      0.267                                 0.1
+## 8        New Zealand 7.307      0.330                                 0.1
+## 9             Canada 7.278      0.285                                 0.3
+## 10           Austria 7.246      0.244                                 0.3
+## 11         Australia 7.228      0.332                                 0.1
+## 12        Costa Rica 7.167      0.144                                 0.6
+## 13            Israel 7.139      0.261                                 0.1
+## 14        Luxembourg 7.090      0.194                                 0.2
+##    Infant.mortality.rate.deaths.1000.live.births. infantmoralityperc upper
+## 1                                              91                9.1  TRUE
+## 2                                             110               11.0  TRUE
+## 3                                              92                9.2  TRUE
+## 4                                              90                9.0  TRUE
+## 5                                             127               12.7  TRUE
+## 6                                             107               10.7  TRUE
+## 7                                              51                5.1  TRUE
+## 8                                             137               13.7  TRUE
+## 9                                             116               11.6  TRUE
+## 10                                            111               11.1  TRUE
+## 11                                            113               11.3  TRUE
+## 12                                            211               21.1  TRUE
+## 13                                            173               17.3  TRUE
+## 14                                            117               11.7  TRUE
+##  [ reached &#39;max&#39; / getOption(&quot;max.print&quot;) -- omitted 126 rows ]</code></pre>
+<pre class="r"><code>data %&gt;% arrange(desc(HIV.AIDS...adult.prevalence.rate...))</code></pre>
+<pre><code>##           Country.or.region Score Generosity
+## 1                 Swaziland 4.212      0.074
+## 2                  Botswana 3.488      0.025
+## 3                   Lesotho 3.802      0.107
+## 4                  Zimbabwe 3.663      0.151
+## 5              South Africa 4.722      0.130
+## 6                   Namibia 4.639      0.070
+## 7                    Zambia 4.107      0.247
+## 8                    Malawi 3.410      0.218
+## 9  Central African Republic 3.083      0.235
+## 10               Mozambique 4.466      0.197
+## 11                 Tanzania 3.231      0.276
+## 12                    Gabon 4.799      0.043
+## 13             Sierra Leone 4.374      0.252
+## 14                 Cameroon 5.044      0.187
+## 15                    Kenya 4.509      0.372
+## 16                  Burundi 3.775      0.176
+## 17                  Liberia 3.975      0.233
+## 18                    Haiti 3.597      0.419
+## 19                  Nigeria 5.265      0.215
+## 20                   Rwanda 3.334      0.217
+##    HIV.AIDS...adult.prevalence.rate...
+## 1                                 38.8
+## 2                                 37.3
+## 3                                 28.9
+## 4                                 24.6
+## 5                                 21.5
+## 6                                 21.3
+## 7                                 16.5
+## 8                                 14.2
+## 9                                 13.5
+## 10                                12.2
+## 11                                 8.8
+## 12                                 8.1
+## 13                                 7.0
+## 14                                 6.9
+## 15                                 6.7
+## 16                                 6.0
+## 17                                 5.9
+## 18                                 5.6
+## 19                                 5.4
+## 20                                 5.1
+##    Infant.mortality.rate.deaths.1000.live.births.
+## 1                                             171
+## 2                                             147
+## 3                                             204
+## 4                                             168
+## 5                                             161
+## 6                                             126
+## 7                                             208
+## 8                                               5
+## 9                                             214
+## 10                                             23
+## 11                                            221
+## 12                                            145
+## 13                                             31
+## 14                                            170
+## 15                                            159
+## 16                                            172
+## 17                                             19
+## 18                                            190
+## 19                                            222
+## 20                                            215
+##  [ reached &#39;max&#39; / getOption(&quot;max.print&quot;) -- omitted 120 rows ]</code></pre>
+<pre class="r"><code>data %&gt;% filter(!is.na(HIV.AIDS...adult.prevalence.rate...)) %&gt;% 
+    mutate(infantmoralityperc = Infant.mortality.rate.deaths.1000.live.births./1000 * 
+        100) %&gt;% mutate(upper = (Score &gt; quantile(Score, 0.5))) %&gt;% 
+    group_by(upper) %&gt;% summarize(meaninfant = mean(infantmoralityperc), 
+    sdinfant = sd(infantmoralityperc), mininfant = min(infantmoralityperc), 
+    maxinfant = max(infantmoralityperc), meangen = mean(Generosity), 
+    sdgen = sd(Generosity), mingen = min(Generosity), maxgen = max(Generosity), 
+    meanHIV = mean(HIV.AIDS...adult.prevalence.rate...), sdHIV = sd(HIV.AIDS...adult.prevalence.rate...), 
+    minHIV = min(HIV.AIDS...adult.prevalence.rate...), maxHIV = max(HIV.AIDS...adult.prevalence.rate...), 
+    n = n())</code></pre>
+<pre><code>## # A tibble: 2 x 14
+##   upper meaninfant sdinfant mininfant maxinfant meangen  sdgen mingen maxgen
+##   &lt;lgl&gt;      &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+## 1 FALSE       12.5     6.91       0.4      22.2   0.182 0.0980  0      0.498
+## 2 TRUE        10.5     5.39       0.8      21.1   0.182 0.0902  0.043  0.375
+## # … with 5 more variables: meanHIV &lt;dbl&gt;, sdHIV &lt;dbl&gt;, minHIV &lt;dbl&gt;,
+## #   maxHIV &lt;dbl&gt;, n &lt;int&gt;</code></pre>
+<pre class="r"><code>numericdata &lt;- data[, -1]
+correlations &lt;- cor(numericdata)
+correlations</code></pre>
+<pre><code>##                                                     Score  Generosity
+## Score                                           1.0000000  0.10700954
+## Generosity                                      0.1070095  1.00000000
+## HIV.AIDS...adult.prevalence.rate...            -0.4415704 -0.12366085
+## Infant.mortality.rate.deaths.1000.live.births. -0.1798814  0.03401833
+##                                                HIV.AIDS...adult.prevalence.rate...
+## Score                                                                   -0.4415704
+## Generosity                                                              -0.1236609
+## HIV.AIDS...adult.prevalence.rate...                                      1.0000000
+## Infant.mortality.rate.deaths.1000.live.births.                           0.2310347
+##                                                Infant.mortality.rate.deaths.1000.live.births.
+## Score                                                                             -0.17988144
+## Generosity                                                                         0.03401833
+## HIV.AIDS...adult.prevalence.rate...                                                0.23103466
+## Infant.mortality.rate.deaths.1000.live.births.                                     1.00000000</code></pre>
+<p>The summary data tells us that for the countries below the median happiness score, the meaninfant, sdinfant, mininfant, maxinfant, meangen, sdgen, mingen, maxgen, meanHIV are 12.54714 6.908275 0.4 22.2 0.1822286 0.09800150 0.000 0.498 and 4.8761429 respectively.</p>
+<p>The summary data tells us that for the countries above the median happiness score, the meaninfant, sdinfant, mininfant, maxinfant, meangen, sdgen, mingen, maxgen, meanHIV are 10.46857 5.391339 0.8 21.1 0.1824571 0.09023796 0.043 0.375 and 0.3685714 respectively.</p>
+<ol start="4" style="list-style-type: decimal">
+<li>Make visualizations (three plots)</li>
+</ol>
+<pre class="r"><code>library(reshape2)
+melted &lt;- melt(correlations)
+head(melted)</code></pre>
+<pre><code>##                                             Var1       Var2      value
+## 1                                          Score      Score  1.0000000
+## 2                                     Generosity      Score  0.1070095
+## 3            HIV.AIDS...adult.prevalence.rate...      Score -0.4415704
+## 4 Infant.mortality.rate.deaths.1000.live.births.      Score -0.1798814
+## 5                                          Score Generosity  0.1070095
+## 6                                     Generosity Generosity  1.0000000</code></pre>
+<pre class="r"><code>library(ggplot2)
+ggplot(data = melted, aes(x = Var1, y = Var2, fill = value)) + 
+    geom_tile()</code></pre>
+<p><img src="../../project/Project1_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># Heatmap
+library(ggplot2)
+ggplot(data = melted, aes(Var2, Var1, fill = value)) + geom_tile(color = &quot;white&quot;) + 
+    scale_fill_gradient2(low = &quot;blue&quot;, high = &quot;red&quot;, mid = &quot;white&quot;, 
+        midpoint = 0, limit = c(-1, 1), space = &quot;Lab&quot;, name = &quot;Pearson\nCorrelation&quot;) + 
+    theme_minimal() + theme(axis.text.x = element_text(angle = 45, 
+    vjust = 1, size = 12, hjust = 1)) + coord_fixed()</code></pre>
+<p><img src="../../project/Project1_files/figure-html/unnamed-chunk-4-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>data &lt;- data %&gt;% mutate(infantmoralityperc = Infant.mortality.rate.deaths.1000.live.births./1000 * 
+    100) %&gt;% mutate(upper = (Score &gt; quantile(Score, 0.5)))
+
+p2 &lt;- ggplot(data, aes(x = infantmoralityperc, y = Generosity, 
+    color = upper)) + geom_point() + geom_smooth(method = lm, 
+    aes(fill = upper))
+
+p2 + labs(title = &quot;Scatterplot of Generosity and Infant Mortality grouped by upper/lower happiness&quot;, 
+    x = &quot;Infant Mortality Per 1000&quot;)</code></pre>
+<p><img src="../../project/Project1_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>data2 &lt;- data %&gt;% filter(!is.na(HIV.AIDS...adult.prevalence.rate...)) %&gt;% 
+    mutate(HIVupper = (HIV.AIDS...adult.prevalence.rate... &gt; 
+        quantile(HIV.AIDS...adult.prevalence.rate..., 0.5)))
+
+p1 &lt;- ggplot(data2, aes(x = HIVupper, y = infantmoralityperc)) + 
+    geom_boxplot()
+p1 + stat_summary(fun.y = &quot;mean&quot;, geom = &quot;point&quot;, size = 5, color = &quot;purple&quot;, 
+    shape = 15) + geom_point(aes(color = upper, width = 0.05)) + 
+    labs(title = &quot;Boxplot of Infant Mortality Per 1000 grouped by upper/lower HIV Prevalence&quot;, 
+        x = &quot;Above 50th Percentile for HIV Prevalence&quot;, y = &quot;Infant Mortality Per 1000&quot;, 
+        colour = &quot;Above 50th Percentile Happiness Score&quot;)</code></pre>
+<p><img src="../../project/Project1_files/figure-html/unnamed-chunk-5-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The first graph shows a Scatterplot of Generosity and Infant Mortality grouped by upper/lower happiness. We can see that there is almost full overlap between the two groups. There are no clear patterns and the generosity score seems to be consistent/randomly varied regardless of happiness score or infant mortality.</p>
+<p>The second graph shows a Boxplot of Infant Mortality Per 1000 grouped by upper/lower HIV Prevalence. We can see that there is a lot of overlap between the two groups. There is more variation in the countries that have HIV prevalence above the median. The mean is plotted in purple square and each individual data point is plotted according to their happiness score relative quantile as well. There do seem to be more countries below the median happiness score in the above the median HIV prevalence box but it is not as distinct as one might have thought.</p>
+<ol start="5" style="list-style-type: decimal">
+<li>Perform k-means/PAM clustering or PCA on (at least) your numeric variables.</li>
+</ol>
+<pre class="r"><code>clust_dat &lt;- data %&gt;% dplyr::select(Score, Generosity, HIV.AIDS...adult.prevalence.rate..., 
+    Infant.mortality.rate.deaths.1000.live.births.)
+
+library(cluster)
+sil_width &lt;- vector()  #empty vector to hold mean sil width
+for (i in 2:10) {
+    kms &lt;- kmeans(clust_dat, centers = i)  #compute k-means solution
+    sil &lt;- silhouette(kms$cluster, dist(clust_dat))  #get sil widths
+    sil_width[i] &lt;- mean(sil[, 3])  #take averages (higher is better)
+}
+ggplot() + geom_line(aes(x = 1:10, y = sil_width)) + scale_x_continuous(name = &quot;k&quot;, 
+    breaks = 1:10)</code></pre>
+<p><img src="../../project/Project1_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>pam1 &lt;- clust_dat %&gt;% pam(k = 2)
+pam1</code></pre>
+<pre><code>## Medoids:
+##      ID Score Generosity HIV.AIDS...adult.prevalence.rate...
+## [1,] 66 5.525      0.133                                 0.3
+## [2,] 51 5.893      0.103                                 1.1
+##      Infant.mortality.rate.deaths.1000.live.births.
+## [1,]                                             74
+## [2,]                                            183
+## Clustering vector:
+##   [1] 1 1 1 1 1 1 1 2 1 1 1 2 2 1 2 2 1 1 2 1 1 1 1 1 2 1 1 1 1 1 1 1 1 1 2 1 2
+##  [38] 2 2 2 1 1 1 1 1 2 1 2 1 2 2 1 1 1 1 1 2 2 1 1 1 2 1 1 1 1 1 2 1 1 1 1 1 1
+##  [75] 2 2 2 1 2 1 1 2 1 1 1 1 1 2 1 2 2 1 2 2 2 2 1 2 2 1
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 40 entries ]
+## Objective function:
+##    build     swap 
+## 34.10786 28.65689 
+## 
+## Available components:
+##  [1] &quot;medoids&quot;    &quot;id.med&quot;     &quot;clustering&quot; &quot;objective&quot;  &quot;isolation&quot; 
+##  [6] &quot;clusinfo&quot;   &quot;silinfo&quot;    &quot;diss&quot;       &quot;call&quot;       &quot;data&quot;</code></pre>
+<pre class="r"><code>library(GGally)
+
+data %&gt;% mutate(cluster = as.factor(pam1$clustering)) %&gt;% ggpairs(columns = c(&quot;Score&quot;, 
+    &quot;Generosity&quot;, &quot;HIV.AIDS...adult.prevalence.rate...&quot;, &quot;Infant.mortality.rate.deaths.1000.live.births.&quot;), 
+    aes(color = cluster))</code></pre>
+<p><img src="../../project/Project1_files/figure-html/unnamed-chunk-6-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot(pam1, which = 2)</code></pre>
+<p><img src="../../project/Project1_files/figure-html/unnamed-chunk-6-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot(pam1, which = 1)</code></pre>
+<p><img src="../../project/Project1_files/figure-html/unnamed-chunk-6-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>eig1 &lt;- data %&gt;% dplyr::select(Score, Generosity, HIV.AIDS...adult.prevalence.rate..., 
+    Infant.mortality.rate.deaths.1000.live.births.) %&gt;% cor() %&gt;% 
+    eigen()
+eig1</code></pre>
+<pre><code>## eigen() decomposition
+## $values
+## [1] 1.6145816 1.0301858 0.8016205 0.5536122
+## 
+## $vectors
+##            [,1]        [,2]       [,3]        [,4]
+## [1,] -0.6158330  0.04629828  0.4163585  0.66727191
+## [2,] -0.2131789  0.84216681 -0.4925346  0.05214889
+## [3,]  0.6389867 -0.01780358 -0.2292895  0.73403361
+## [4,]  0.4086569  0.53693070  0.7290278 -0.11499283</code></pre>
+<pre class="r"><code>eig1$vectors</code></pre>
+<pre><code>##            [,1]        [,2]       [,3]        [,4]
+## [1,] -0.6158330  0.04629828  0.4163585  0.66727191
+## [2,] -0.2131789  0.84216681 -0.4925346  0.05214889
+## [3,]  0.6389867 -0.01780358 -0.2292895  0.73403361
+## [4,]  0.4086569  0.53693070  0.7290278 -0.11499283</code></pre>
+<pre class="r"><code>eig1$values</code></pre>
+<pre><code>## [1] 1.6145816 1.0301858 0.8016205 0.5536122</code></pre>
+<pre class="r"><code>matA &lt;- matrix(data %&gt;% dplyr::select(Score, Generosity, HIV.AIDS...adult.prevalence.rate..., 
+    Infant.mortality.rate.deaths.1000.live.births.) %&gt;% scale(), 
+    nrow = 140)
+
+matA</code></pre>
+<pre><code>##                [,1]        [,2]         [,3]        [,4]
+##   [1,]  2.056873618 -0.31262248 -0.394042058 -0.38454625
+##   [2,]  1.907694133  0.74213593 -0.378420081 -0.08110720
+##   [3,]  1.867089066  0.94456431 -0.394042058 -0.36857577
+##   [4,]  1.814125936  1.82885671 -0.378420081 -0.40051672
+##   [5,]  1.808829623  1.48792470 -0.378420081  0.19039089
+##   [6,]  1.801767872  0.85933131 -0.347176127 -0.12901863
+##   [7,]  1.680835390  0.90194781 -0.394042058 -1.02336529
+##   [8,]  1.649057512  1.57315771 -0.394042058  0.35009565
+##   [9,]  1.623458666  1.09372207 -0.362798104  0.01471565
+##  [10,]  1.595211663  0.65690293 -0.362798104 -0.06513673
+##  [11,]  1.579322723  1.59446596 -0.394042058 -0.03319578
+##  [12,]  1.525476874 -0.40850961 -0.315932172  1.53191087
+##  [13,]  1.500760746  0.83802306 -0.394042058  0.92503279
+##  [14,]  1.457507523  0.12419666 -0.378420081  0.03068613
+##  [15,]  1.425729645  1.76493196 -0.378420081  0.23830232
+##  [16,]  1.396599923  1.23222570 -0.394042058  0.28621375
+##  [17,]  1.364822045  0.83802306 -0.394042058 -0.16095958
+##  [18,]  1.310093476 -0.23804360 -0.378420081 -0.04916625
+##  [19,]  1.282729192  1.04045144 -0.315932172  0.63756422
+##  [20,]  1.247420438 -1.45261389 -0.394042058 -0.33663482
+##  [21,]  1.223587030  0.84867718 -0.381544476 -1.40665671
+##  [22,]  1.136197864  2.05259335 -0.378420081 -0.35260530
+##  [23,]  1.020561696 -1.15429838 -0.362798104 -0.91157196
+##  [24,]  1.017913539 -0.76009574 -0.347176127 -0.14498911
+##  [25,]  0.887271150  0.04961778 -0.362798104  1.38817659
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 115 rows ]</code></pre>
+<pre class="r"><code>matB &lt;- matrix(eig1$vectors, nrow = 4)
+PCAscores &lt;- matA %*% matB
+
+plot(PCAscores)</code></pre>
+<p><img src="../../project/Project1_files/figure-html/unnamed-chunk-6-5.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>data %&gt;% mutate(PC1 = PCAscores[, 1], PC2 = PCAscores[, 2]) %&gt;% 
+    ggplot(aes(PC1, PC2, color = upper)) + geom_point()</code></pre>
+<p><img src="../../project/Project1_files/figure-html/unnamed-chunk-6-6.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>- Include all steps as we discuss in class, including a visualization.
+
+- If you don&#39;t have at least 3 numeric variables, or you want to cluster based on categorical variables too, convert them to factors in R, generate Gower&#39;s dissimilarity matrix on the data, and do PAM clustering on the dissimilarities.
+
+- Show how you chose the final number of clusters/principal components 
+
+- Interpret the final clusters/principal components 
+
+- For every step, document what your code does (in words) and what you see in the data!     </code></pre>
+<P style="page-break-before: always">
+
+</div>
+<div id="rubric" class="section level3">
+<h3>Rubric</h3>
+<p>Prerequisite: Finding appropriate data from at least two sources per the instructions above: Failure to do this will result in a 0! You will submit a .Rmd file and a knitted document (pdf).</p>
+<div id="introduction-4-pts" class="section level4">
+<h4>0. Introduction (4 pts)</h4>
+<ul>
+<li>Write a narrative introductory paragraph or two describing the datasets you have chosen, the variables they contain, how they were acquired, and why they are interesting to you. Expand on potential associations you may expect, if any.</li>
+</ul>
+</div>
+<div id="tidying-rearranging-widelong-8-pts" class="section level4">
+<h4>1. Tidying: Rearranging Wide/Long (8 pts)</h4>
+<ul>
+<li>Tidy the datasets (using the <code>tidyr</code> functions <code>pivot_longer</code>/<code>gather</code> and/or <code>pivot_wider</code>/<code>spread</code>)</li>
+<li>If you data sets are already tidy, be sure to use those functions somewhere else in your project</li>
+<li>Document the process (describe in words what was done per the instructions)</li>
+</ul>
+</div>
+<div id="joiningmerging-8-pts" class="section level4">
+<h4>2. Joining/Merging (8 pts)</h4>
+<ul>
+<li>Join your datasets into one using a <code>dplyr</code> join function</li>
+<li>If you have multiple observations on the joining variable in either dataset, fix this by collapsing via summarize</li>
+<li>Discuss the process in words, including why you chose the join you did</li>
+<li>Discuss which cases were dropped, if any, and potential problems with this</li>
+</ul>
+</div>
+<div id="wrangling-40-pts" class="section level4">
+<h4>3. Wrangling (40 pts)</h4>
+<ul>
+<li>Use all six core <code>dplyr</code> functions in the service of generating summary statistics (18 pts)
+<ul>
+<li>Use mutate at least once to generate a variable that is a function of at least one other variable</li>
+</ul></li>
+<li>Compute at least 10 summary statistics for using summarize and summarize with group_by (18 pts)
+<ul>
+<li>Use at least 5 unique functions inside of summarize (e.g., mean, sd)</li>
+<li>At least 2 of these should group by a categorical variable. Create one by dichotomizing a numeric if necessary</li>
+<li>If applicable, at least 1 of these should group by two categorical variables</li>
+<li>Strongly encouraged to create a correlation matrix with <code>cor()</code> on your numeric variables</li>
+</ul></li>
+<li>Summarize/discuss all results in no more than two paragraphs (4 pts)</li>
+</ul>
+</div>
+<div id="visualizing-30-pts" class="section level4">
+<h4>4. Visualizing (30 pts)</h4>
+<ul>
+<li><p>Create a correlation heatmap of your numeric variables</p></li>
+<li><p>Create two effective, polished plots with ggplot</p>
+<ul>
+<li>Each plot should map 3+ variables to aesthetics</li>
+<li>Each plot should have a title and clean labeling for all mappings</li>
+<li>Change at least one default theme element and color for at least one mapping per plot</li>
+<li>For at least one plot, add more tick marks (x, y, or both) than are given by default</li>
+<li>For at least one plot, use the stat=&quot;summary&quot; function</li>
+<li>Supporting paragraph or two (for each plot) describing the relationships/trends that are apparent</li>
+</ul></li>
+</ul>
+</div>
+<div id="dimensionality-reduction-20-pts" class="section level4">
+<h4>5. Dimensionality Reduction (20 pts)</h4>
+<ul>
+<li><p>Either k-means/PAM clustering or PCA (inclusive &quot;or&quot;) should be performed on at least three numeric variables in your dataset</p>
+<ul>
+<li>All relevant steps discussed in class</li>
+<li>A visualization of the clusters or the first few principal components (using ggplot2)</li>
+<li>Supporting paragraph or two describing results found</li>
+</ul></li>
+</ul>
+</div>
+<div id="neatness" class="section level4">
+<h4>6. Neatness!</h4>
+<ul>
+<li>Your project should not knit to more than 30 or so pages (probably closer to 10)! You will lose points if you print out your entire dataset(s), have terrible formatting, etc. If you start your project in a fresh .Rmd file, you are advised to paste the set-up code from this document (lines 14-17) at the top of it: this will automatically truncate if you accidentally print out a huge dataset, etc. Imagine this is a polished report you are giving to your PI or boss to summarize your work researching a topic.</li>
+</ul>
+<p>...</p>
+</div>
+</div>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="../../js/docs.min.js"></script>
+<script src="../../js/main.js"></script>
+
+<script src="../../js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>
